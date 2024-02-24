@@ -12,9 +12,4 @@ public class ConfirmedRequestShortDto {
     private Long eventId;
 
     private Long confirmedRequestsCount;
-
-    public ConfirmedRequestShortDto(Long eventId, Long confirmedRequestsCount) {
-        this.eventId = eventId;
-        this.confirmedRequestsCount = confirmedRequestsCount;
-    }
 }

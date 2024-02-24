@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserShortDto { // Добавил
+public class UserShortDto {
     @NotNull
     private Long id;
     @NotEmpty

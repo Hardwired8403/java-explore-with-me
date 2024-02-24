@@ -56,10 +56,6 @@ public class CategoryAdminServiceImpl implements CategoryAdminService {
         if (eventMainServiceRepository.existsByCategoryId(catId)) {
             throw new ConflictException("Can't delete a category with associated events");
         }
-
-        if (!categoryMainServiceRepository.existsById(catId)) {
-            throw new NotFoundException("Category does not exist");
-        }
         log.info("Result: category with id - {} - deleted", catId);
         categoryMainServiceRepository.deleteById(catId);
     }

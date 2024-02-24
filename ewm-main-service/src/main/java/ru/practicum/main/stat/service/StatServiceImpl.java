@@ -34,7 +34,7 @@ public class StatServiceImpl implements StatService {
 
     private final StatClient statClient;
 
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Value("${main_app}")
     private String app;

@@ -50,58 +50,8 @@ public class EventAdminServiceImpl implements EventAdminService {
         Event event = repository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Event with id = " + eventId + " not found "));
 
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-            log.error("Event {} is already in progress or has passed, it cannot be changed", event.getTitle());
-            throw new BadRequestException("This event is already in progress or has passed, it cannot be changed");
-        }
-        if (eventAdminDto.getEventDate() != null) {
-            if (eventAdminDto.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                log.error("The data for updating the event date is incorrect. Date: {}", eventAdminDto.getEventDate());
-                throw new BadRequestException("The data for updating the event date is incorrect.");
-            } else {
-                event.setEventDate(eventAdminDto.getEventDate());
-            }
-        }
-        if (eventAdminDto.getStateAction() != null) {
-            if (!event.getState().equals(State.PENDING)) {
-                log.error("Сan not modify an event that state is {} ", eventAdminDto.getStateAction());
-                throw new ConflictException("Сan not modify an event that is not in the status of pending, published, or canceled");
-            }
-
-            if (eventAdminDto.getStateAction().equals(AdminEventStatus.PUBLISH_EVENT)) {
-                event.setState(State.PUBLISHED);
-                event.setPublishedOn(LocalDateTime.now().withNano(0));
-            }
-            if (eventAdminDto.getStateAction().equals(AdminEventStatus.REJECT_EVENT)) {
-                event.setState(State.CANCELED);
-            }
-        }
-
-        if (eventAdminDto.getRequestModeration() != null) {
-            event.setRequestModeration(eventAdminDto.getRequestModeration());
-        }
-        if (eventAdminDto.getPaid() != null) {
-            event.setPaid(eventAdminDto.getPaid());
-        }
-        if (eventAdminDto.getParticipantLimit() != null) {
-            event.setParticipantLimit(eventAdminDto.getParticipantLimit());
-        }
-        if (eventAdminDto.getLocation() != null) {
-            event.setLocation(getLocation(eventAdminDto.getLocation()).orElse(saveLocation(eventAdminDto.getLocation())));
-        }
-        if (eventAdminDto.getAnnotation() != null && !eventAdminDto.getTitle().isBlank()) {
-            event.setAnnotation(eventAdminDto.getAnnotation());
-        }
-        if (eventAdminDto.getDescription() != null && !eventAdminDto.getDescription().isBlank()) {
-            event.setDescription(eventAdminDto.getDescription());
-        }
-        if (eventAdminDto.getTitle() != null && !eventAdminDto.getTitle().isBlank()) {
-            event.setTitle(eventAdminDto.getTitle());
-        }
-        if (eventAdminDto.getCategory() != null) {
-            event.setCategory(categoryMainServiceRepository.findById(eventAdminDto.getCategory())
-                    .orElseThrow(() -> new NotFoundException("Категория не найдена")));
-        }
+        validateEventUpdate(event, eventAdminDto);
+        updateEventFields(event, eventAdminDto);
 
         Map<Long, Long> confirmedRequest = statService.toConfirmedRequest(List.of(event));
         Map<Long, Long> view = statService.toView(List.of(event));
@@ -130,6 +80,63 @@ public class EventAdminServiceImpl implements EventAdminService {
 
         log.info("Result: a list of events was returned - size = {}", events.size());
         return EventMapper.toListEventFullDto(events);
+    }
+
+    private void validateEventUpdate(Event event, EventAdminDto eventAdminDto) {
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+            log.error("Event {} is already in progress or has passed, it cannot be changed", event.getTitle());
+            throw new BadRequestException("This event is already in progress or has passed, it cannot be changed");
+        }
+        if (eventAdminDto.getEventDate() != null) {
+            if (eventAdminDto.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                log.error("The data for updating the event date is incorrect. Date: {}", eventAdminDto.getEventDate());
+                throw new BadRequestException("The data for updating the event date is incorrect.");
+            } else {
+                event.setEventDate(eventAdminDto.getEventDate());
+            }
+        }
+        if (eventAdminDto.getStateAction() != null) {
+            if (!event.getState().equals(State.PENDING)) {
+                log.error("Сan not modify an event that state is {} ", eventAdminDto.getStateAction());
+                throw new ConflictException("Сan not modify an event that is not in the status of pending, published, or canceled");
+            }
+
+            if (eventAdminDto.getStateAction().equals(AdminEventStatus.PUBLISH_EVENT)) {
+                event.setState(State.PUBLISHED);
+                event.setPublishedOn(LocalDateTime.now().withNano(0));
+            }
+            if (eventAdminDto.getStateAction().equals(AdminEventStatus.REJECT_EVENT)) {
+                event.setState(State.CANCELED);
+            }
+        }
+    }
+
+    private void updateEventFields(Event event, EventAdminDto eventAdminDto) {
+        if (eventAdminDto.getRequestModeration() != null) {
+            event.setRequestModeration(eventAdminDto.getRequestModeration());
+        }
+        if (eventAdminDto.getPaid() != null) {
+            event.setPaid(eventAdminDto.getPaid());
+        }
+        if (eventAdminDto.getParticipantLimit() != null) {
+            event.setParticipantLimit(eventAdminDto.getParticipantLimit());
+        }
+        if (eventAdminDto.getLocation() != null) {
+            event.setLocation(getLocation(eventAdminDto.getLocation()).orElse(saveLocation(eventAdminDto.getLocation())));
+        }
+        if (eventAdminDto.getAnnotation() != null && !eventAdminDto.getTitle().isBlank()) {
+            event.setAnnotation(eventAdminDto.getAnnotation());
+        }
+        if (eventAdminDto.getDescription() != null && !eventAdminDto.getDescription().isBlank()) {
+            event.setDescription(eventAdminDto.getDescription());
+        }
+        if (eventAdminDto.getTitle() != null && !eventAdminDto.getTitle().isBlank()) {
+            event.setTitle(eventAdminDto.getTitle());
+        }
+        if (eventAdminDto.getCategory() != null) {
+            event.setCategory(categoryMainServiceRepository.findById(eventAdminDto.getCategory())
+                    .orElseThrow(() -> new NotFoundException("Категория не найдена")));
+        }
     }
 
     private Location saveLocation(Location location) {
