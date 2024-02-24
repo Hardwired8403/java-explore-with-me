@@ -248,11 +248,11 @@ public class EventPrivateServiceImpl implements EventPrivateService {
                 return new NotFoundException("Request not found");
             });
 
-            if (Objects.equals(requestShort.getStatus(),Status.CONFIRMED)) {
+            if (requestShort.getStatus().equals(Status.CONFIRMED)) {
                 request.setStatus(Status.CONFIRMED);
                 updateRequest.getConformedRequest().add(request);
             }
-            if (Objects.equals(requestShort.getStatus(), Status.REJECTED)) {
+            if (requestShort.getStatus().equals(Status.REJECTED)) {
                 request.setStatus(Status.REJECTED);
                 updateRequest.getCanselRequest().add(request);
             }
