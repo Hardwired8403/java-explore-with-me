@@ -59,7 +59,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -120,8 +119,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventFromAdmin(Long eventId, UpdateEventAdminRequest updateEvent) {
         Event oldEvent = checkEvent(eventId);
-        if (Objects.equals(oldEvent.getEventStatus(), EventStatus.PUBLISHED)
-                || Objects.equals(oldEvent.getEventStatus(), EventStatus.CANCELED)) {
+        if (EventStatus.PUBLISHED.equals(oldEvent.getEventStatus())
+                || EventStatus.CANCELED.equals(oldEvent.getEventStatus())) {
             throw new ConflictException("Можно изменить только неподтвержденное событие");
         }
         boolean hasChanges = false;
@@ -313,10 +312,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventFromPublic(SearchEventParams searchEventParams, HttpServletRequest request) {
 
-        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null) {
-            if (searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
+        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null && searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
                 throw new UncorrectedParametersException("Дата окончания не может быть раньше даты начала");
-            }
         }
 
         addStatsClient(request);
