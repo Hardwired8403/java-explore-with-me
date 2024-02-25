@@ -38,6 +38,7 @@ public class StatsRepositoryImpl implements StatsRepository {
      * @param request объект ViewsStatsRequest, содержащий информацию для запроса статистики
      * @return список объектов ViewStats, содержащих статистику просмотров
      */
+    @SuppressWarnings("null")
     @Override
     public List<ViewStats> getStats(ViewsStatsRequest request) {
         String query = "SELECT app, uri, COUNT (ip) AS hits FROM stats WHERE (created >= ? AND created <= ?) ";
@@ -54,6 +55,7 @@ public class StatsRepositoryImpl implements StatsRepository {
      * @param request объект ViewsStatsRequest, содержащий информацию для запроса статистики
      * @return список объектов ViewStats, содержащих уникальную статистику просмотров
      */
+    @SuppressWarnings("null")
     @Override
     public List<ViewStats> getUniqueStats(ViewsStatsRequest request) {
         String query = "SELECT app, uri, COUNT (DISTINCT ip) AS hits FROM stats WHERE (created >= ? AND created <= ?) ";

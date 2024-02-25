@@ -21,6 +21,7 @@ public class ViewStatsMapper implements RowMapper<ViewStats> {
      * @return объект ViewStats
      * @throws SQLException если произошла ошибка при доступе к данным в ResultSet
      */
+    @SuppressWarnings("null")
     @Override
     public ViewStats mapRow(ResultSet rs, int rowNum) throws SQLException {
         return ViewStats.builder()

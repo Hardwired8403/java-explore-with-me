@@ -1,6 +1,5 @@
 package ru.practicum.ewm;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -12,7 +11,6 @@ import java.util.Map;
 /**
  * Базовый клиент для взаимодействия с внешними сервисами посредством REST-запросов.
  */
-@Slf4j
 public class BaseClient {
     protected final RestTemplate restTemplate;
 
@@ -51,6 +49,7 @@ public class BaseClient {
      * @param <T>        тип тела запроса
      * @return объект ResponseEntity<Object> с ответом на запрос
      */
+    @SuppressWarnings("null")
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path,
                                                           @Nullable Map<String, Object> parameters, @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
@@ -73,6 +72,7 @@ public class BaseClient {
      *
      * @return объект HttpHeaders со значениями по умолчанию
      */
+    @SuppressWarnings("null")
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
