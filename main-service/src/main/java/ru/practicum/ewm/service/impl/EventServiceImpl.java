@@ -69,10 +69,8 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final ObjectMapper objectMapper;
 
-
     @Value("${server.application.name:ewm-service}")
     private final String applicationName;
-
 
     @Override
     public List<EventFullDto> getAllEventFromAdmin(SearchEventParamsAdmin searchEventParamsAdmin) {
@@ -87,24 +85,24 @@ public class EventServiceImpl implements EventService {
         LocalDateTime rangeStart = searchEventParamsAdmin.getRangeStart();
 
         if (users != null && !users.isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    root.get("initiator").get("id").in(users));
+            specification = specification
+                    .and((root, query, criteriaBuilder) -> root.get("initiator").get("id").in(users));
         }
         if (states != null && !states.isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    root.get("eventStatus").as(String.class).in(states));
+            specification = specification
+                    .and((root, query, criteriaBuilder) -> root.get("eventStatus").as(String.class).in(states));
         }
         if (categories != null && !categories.isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    root.get("category").get("id").in(categories));
+            specification = specification
+                    .and((root, query, criteriaBuilder) -> root.get("category").get("id").in(categories));
         }
         if (rangeEnd != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
         }
         if (rangeStart != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
         }
         Page<Event> events = eventRepository.findAll(specification, pageable);
 
@@ -119,11 +117,11 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
-
     @Override
     public EventFullDto updateEventFromAdmin(Long eventId, UpdateEventAdminRequest updateEvent) {
         Event oldEvent = checkEvent(eventId);
-        if (Objects.equals(oldEvent.getEventStatus(), EventStatus.PUBLISHED) || Objects.equals(oldEvent.getEventStatus(), EventStatus.CANCELED)) {
+        if (Objects.equals(oldEvent.getEventStatus(), EventStatus.PUBLISHED)
+                || Objects.equals(oldEvent.getEventStatus(), EventStatus.CANCELED)) {
             throw new ConflictException("Можно изменить только неподтвержденное событие");
         }
         boolean hasChanges = false;
@@ -209,7 +207,8 @@ public class EventServiceImpl implements EventService {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id= " + userId + " не найден");
         }
-        PageRequest pageRequest = PageRequest.of(from / size, size, org.springframework.data.domain.Sort.by(Sort.Direction.ASC, "id"));
+        PageRequest pageRequest = PageRequest.of(from / size, size,
+                org.springframework.data.domain.Sort.by(Sort.Direction.ASC, "id"));
         return eventRepository.findAll(pageRequest).getContent()
                 .stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
     }
@@ -244,7 +243,6 @@ public class EventServiceImpl implements EventService {
         return eventFullDto;
     }
 
-
     @Override
     public List<ParticipationRequestDto> getAllParticipationRequestsFromEventByOwner(Long userId, Long eventId) {
         checkUser(userId);
@@ -254,7 +252,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventRequestStatusUpdateResult updateStatusRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest inputUpdate) {
+    public EventRequestStatusUpdateResult updateStatusRequest(Long userId, Long eventId,
+            EventRequestStatusUpdateRequest inputUpdate) {
         checkUser(userId);
         Event event = checkEvenByInitiatorAndEventId(userId, eventId);
 
@@ -274,7 +273,8 @@ public class EventServiceImpl implements EventService {
                                 .idsFromUpdateStatus(new ArrayList<>(inputUpdate.getRequestIds())).build(),
                         RequestStatus.CONFIRMED, confirmedRequestsCount);
 
-                List<Request> confirmedRequests = requestRepository.findAllById(updatedStatusConfirmed.getProcessedIds());
+                List<Request> confirmedRequests = requestRepository
+                        .findAllById(updatedStatusConfirmed.getProcessedIds());
                 List<Request> rejectedRequests = new ArrayList<>();
                 if (updatedStatusConfirmed.getIdsFromUpdateStatus().size() != 0) {
                     List<Long> ids = updatedStatusConfirmed.getIdsFromUpdateStatus();
@@ -313,47 +313,48 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventFromPublic(SearchEventParams searchEventParams, HttpServletRequest request) {
 
-        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null && searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
+        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null) {
+            if (searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
                 throw new UncorrectedParametersException("Дата окончания не может быть раньше даты начала");
+            }
         }
 
         addStatsClient(request);
 
-        Pageable pageable = PageRequest.of(searchEventParams.getFrom() / searchEventParams.getSize(), searchEventParams.getSize());
+        Pageable pageable = PageRequest.of(searchEventParams.getFrom() / searchEventParams.getSize(),
+                searchEventParams.getSize());
 
         Specification<Event> specification = Specification.where(null);
         LocalDateTime now = LocalDateTime.now();
 
         if (searchEventParams.getText() != null) {
             String searchText = searchEventParams.getText().toLowerCase();
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.or(
-                            criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), "%" + searchText + "%"),
-                            criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + searchText + "%")
-                    ));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), "%" + searchText + "%"),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + searchText + "%")));
         }
 
         if (searchEventParams.getCategories() != null && !searchEventParams.getCategories().isEmpty()) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    root.get("category").get("id").in(searchEventParams.getCategories()));
+            specification = specification.and((root, query, criteriaBuilder) -> root.get("category").get("id")
+                    .in(searchEventParams.getCategories()));
         }
 
         LocalDateTime startDateTime = Objects.requireNonNullElse(searchEventParams.getRangeStart(), now);
-        specification = specification.and((root, query, criteriaBuilder) ->
-                criteriaBuilder.greaterThan(root.get("eventDate"), startDateTime));
+        specification = specification.and(
+                (root, query, criteriaBuilder) -> criteriaBuilder.greaterThan(root.get("eventDate"), startDateTime));
 
         if (searchEventParams.getRangeEnd() != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.lessThan(root.get("eventDate"), searchEventParams.getRangeEnd()));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .lessThan(root.get("eventDate"), searchEventParams.getRangeEnd()));
         }
 
         if (searchEventParams.getOnlyAvailable() != null) {
-            specification = specification.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("participantLimit"), 0));
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                    .greaterThanOrEqualTo(root.get("participantLimit"), 0));
         }
 
-        specification = specification.and((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("eventStatus"), EventStatus.PUBLISHED));
+        specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder
+                .equal(root.get("eventStatus"), EventStatus.PUBLISHED));
 
         List<Event> resultEvents = eventRepository.findAll(specification, pageable).getContent();
         List<EventShortDto> result = resultEvents
@@ -439,14 +440,13 @@ public class EventServiceImpl implements EventService {
                     .filter(statsDto -> statsDto.getUri().startsWith("/events/"))
                     .collect(Collectors.toMap(
                             statsDto -> Long.parseLong(statsDto.getUri().substring("/events/".length())),
-                            ViewStats::getHits
-                    ));
+                            ViewStats::getHits));
         }
         return viewStatsMap;
     }
 
     private CaseUpdatedStatusDto updatedStatusConfirmed(Event event, CaseUpdatedStatusDto caseUpdatedStatus,
-                                                        RequestStatus status, int confirmedRequestsCount) {
+            RequestStatus status, int confirmedRequestsCount) {
         int freeRequest = event.getParticipantLimit() - confirmedRequestsCount;
         List<Long> ids = caseUpdatedStatus.getIdsFromUpdateStatus();
         List<Long> processedIds = new ArrayList<>();
