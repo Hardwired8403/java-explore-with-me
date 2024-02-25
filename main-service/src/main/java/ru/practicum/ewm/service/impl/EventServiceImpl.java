@@ -71,7 +71,7 @@ public class EventServiceImpl implements EventService {
 
 
     @Value("${server.application.name:ewm-service}")
-    private String applicationName;
+    private final String applicationName;
 
 
     @Override
@@ -123,7 +123,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventFromAdmin(Long eventId, UpdateEventAdminRequest updateEvent) {
         Event oldEvent = checkEvent(eventId);
-        if (oldEvent.getEventStatus().equals(EventStatus.PUBLISHED) || oldEvent.getEventStatus().equals(EventStatus.CANCELED)) {
+        if (Objects.equals(oldEvent.getEventStatus(), EventStatus.PUBLISHED) || Objects.equals(oldEvent.getEventStatus(), EventStatus.CANCELED)) {
             throw new ConflictException("Можно изменить только неподтвержденное событие");
         }
         boolean hasChanges = false;
@@ -313,10 +313,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventFromPublic(SearchEventParams searchEventParams, HttpServletRequest request) {
 
-        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null) {
-            if (searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
+        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null && searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
                 throw new UncorrectedParametersException("Дата окончания не может быть раньше даты начала");
-            }
         }
 
         addStatsClient(request);
