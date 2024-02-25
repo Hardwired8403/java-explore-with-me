@@ -118,8 +118,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventFromAdmin(Long eventId, UpdateEventAdminRequest updateEvent) {
         Event oldEvent = checkEvent(eventId);
-        if (EventStatus.PUBLISHED.equals(oldEvent.getEventStatus())
-                || EventStatus.CANCELED.equals(oldEvent.getEventStatus())) {
+        if (oldEvent.getEventStatus().equals(EventStatus.PUBLISHED)
+                || oldEvent.getEventStatus().equals(EventStatus.CANCELED)) {
             throw new ConflictException("Можно изменить только неподтвержденное событие");
         }
         boolean hasChanges = false;
