@@ -49,7 +49,7 @@ public class EventServiceImpl implements EventService {
 
 
     @Value("${server.application.name:ewm-service}")
-    private final String applicationName;
+    private String applicationName;
 
 
     @Override
