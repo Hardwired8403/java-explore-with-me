@@ -311,8 +311,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventFromPublic(SearchEventParams searchEventParams, HttpServletRequest request) {
 
-        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null && searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
-                throw new UncorrectedParametersException("Дата окончания не может быть раньше даты начала");
+        if (searchEventParams.getRangeEnd() != null && searchEventParams.getRangeStart() != null) {
+            if (searchEventParams.getRangeEnd().isBefore(searchEventParams.getRangeStart())) {
+                throw new UncorrectedParametersException("Дата окончания не может быть раньше даты начала");   
+            }
         }
 
         addStatsClient(request);
