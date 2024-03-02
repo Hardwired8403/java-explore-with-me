@@ -1,11 +1,14 @@
 package ru.practicum.ewm.service;
 
-import ru.practicum.ewm.dto.CompilationDto;
-import ru.practicum.ewm.dto.NewCompilationDto;
-import ru.practicum.ewm.dto.UpdateCompilationDto;
+import ru.practicum.ewm.dto.compilatoin.CompilationDto;
+import ru.practicum.ewm.dto.compilatoin.NewCompilationDto;
+import ru.practicum.ewm.dto.compilatoin.UpdateCompilationDto;
 
 import java.util.List;
 
+/**
+ * Интерфейс CompilationService, определяющий методы для работы с подборками
+ */
 public interface CompilationService {
     CompilationDto addCompilation(NewCompilationDto compilationDto);
 
