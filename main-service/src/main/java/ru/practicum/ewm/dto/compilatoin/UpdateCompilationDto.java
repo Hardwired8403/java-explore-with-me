@@ -1,10 +1,6 @@
-package ru.practicum.ewm.dto;
+package ru.practicum.ewm.dto.compilatoin;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.Size;
 import java.util.Set;
@@ -15,9 +11,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class UpdateCompilationDto {
+
     private Long id;
     private Set<Long> events;
     private Boolean pinned;
+
     @Size(max = 50)
     private String title;
 }

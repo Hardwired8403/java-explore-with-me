@@ -4,23 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
-import ru.practicum.ewm.dto.EventFullDto;
-import ru.practicum.ewm.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.ewm.dto.EventRequestStatusUpdateResult;
-import ru.practicum.ewm.dto.EventShortDto;
-import ru.practicum.ewm.dto.NewEventDto;
-import ru.practicum.ewm.dto.ParticipationRequestDto;
-import ru.practicum.ewm.dto.UpdateEventUserRequest;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.EventShortDto;
+import ru.practicum.ewm.dto.event.NewEventDto;
+import ru.practicum.ewm.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.ewm.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.ewm.dto.request.ParticipationRequestDto;
+import ru.practicum.ewm.dto.request.UpdateEventUserRequest;
 import ru.practicum.ewm.service.EventService;
 
 import javax.validation.Valid;
@@ -35,8 +26,17 @@ import java.util.List;
 @Validated
 @RequestMapping(path = "/users/{userId}/events")
 public class EventPrivateController {
+
     private final EventService eventService;
 
+    /**
+     * Обрабатывает GET запрос на получение списка событий, принадлежащих пользователю.
+     *
+     * @param userId - ID пользователя
+     * @param from   - начальный индекс для пагинации (по умолчанию 0)
+     * @param size   - количество записей на страницу для пагинации (по умолчанию 10)
+     * @return список объектов EventShortDto с информацией о событиях пользователя
+     */
     @GetMapping
     public List<EventShortDto> getAllEventsByUserId(@PathVariable(value = "userId") @Min(1) Long userId,
                                                     @RequestParam(value = "from", defaultValue = "0")
@@ -47,6 +47,13 @@ public class EventPrivateController {
         return eventService.getEventsByUserId(userId, from, size);
     }
 
+    /**
+     * Обрабатывает POST запрос на добавление нового события от пользователя.
+     *
+     * @param userId - ID пользователя
+     * @param input  - объект данных нового события
+     * @return объект EventFullDto с информацией о созданном событии
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable(value = "userId") @Min(1) Long userId,
@@ -55,6 +62,13 @@ public class EventPrivateController {
         return eventService.addNewEvent(userId, input);
     }
 
+    /**
+     * Получает полную информацию о событии, принадлежащем определенному пользователю.
+     *
+     * @param userId  идентификатор пользователя (минимальное значение: 1)
+     * @param eventId идентификатор события (минимальное значение: 1)
+     * @return объект EventFullDto с полной информацией о событии
+     */
     @GetMapping("/{eventId}")
     public EventFullDto getFullEventByOwner(@PathVariable(value = "userId") @Min(1) Long userId,
                                             @PathVariable(value = "eventId") @Min(1) Long eventId) {
@@ -62,6 +76,14 @@ public class EventPrivateController {
         return eventService.getEventByUserIdAndEventId(userId, eventId);
     }
 
+    /**
+     * Обновляет информацию о событии, принадлежащем определенному пользователю.
+     *
+     * @param userId      идентификатор пользователя (минимальное значение: 0)
+     * @param eventId     идентификатор события (минимальное значение: 0)
+     * @param inputUpdate объект UpdateEventUserRequest с данными для обновления события
+     * @return объект EventFullDto с обновленной информацией о событии
+     */
     @PatchMapping("/{eventId}")
     public EventFullDto updateEventByOwner(@PathVariable(value = "userId") @Min(0) Long userId,
                                            @PathVariable(value = "eventId") @Min(0) Long eventId,
@@ -70,6 +92,13 @@ public class EventPrivateController {
         return eventService.updateEventByUserIdAndEventId(userId, eventId, inputUpdate);
     }
 
+    /**
+     * Получает список всех запросов на участие в событии, принадлежащем определенному пользователю.
+     *
+     * @param userId  идентификатор пользователя (минимальное значение: 1)
+     * @param eventId идентификатор события (минимальное значение: 1)
+     * @return список объектов ParticipationRequestDto с информацией о запросах на участие в событии
+     */
     @GetMapping("/{eventId}/requests")
     public List<ParticipationRequestDto> getAllRequestByEventFromOwner(@PathVariable(value = "userId") @Min(1) Long userId,
                                                                        @PathVariable(value = "eventId") @Min(1) Long eventId) {
@@ -77,6 +106,14 @@ public class EventPrivateController {
         return eventService.getAllParticipationRequestsFromEventByOwner(userId, eventId);
     }
 
+    /**
+     * Обновляет статус запроса на участие в событии, принадлежащем определенному пользователю.
+     *
+     * @param userId      идентификатор пользователя (минимальное значение: 1)
+     * @param eventId     идентификатор события (минимальное значение: 1)
+     * @param inputUpdate объект EventRequestStatusUpdateRequest с данными для обновления статуса запроса
+     * @return объект EventRequestStatusUpdateResult с результатом обновления статуса запроса
+     */
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult updateStatusRequestFromOwner(@PathVariable(value = "userId") @Min(1) Long userId,
                                                                        @PathVariable(value = "eventId") @Min(1) Long eventId,

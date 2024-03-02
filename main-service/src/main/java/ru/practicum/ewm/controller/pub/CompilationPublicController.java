@@ -4,14 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
-import ru.practicum.ewm.dto.CompilationDto;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.dto.compilatoin.CompilationDto;
 import ru.practicum.ewm.service.CompilationService;
 
 import javax.validation.constraints.Positive;
@@ -24,8 +18,17 @@ import java.util.List;
 @Validated
 @Slf4j
 public class CompilationPublicController {
+
     private final CompilationService compilationService;
 
+    /**
+     * Получает список подборок со страницами.
+     *
+     * @param pinned флаг "закреплено" (необязательный параметр)
+     * @param from   начальная позиция списка (по умолчанию: 0, значение должно быть неотрицательным)
+     * @param size   размер страницы (по умолчанию: 10, значение должно быть положительным)
+     * @return список объектов CompilationDto с информацией о подборках
+     */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CompilationDto> getCompilations(
@@ -35,6 +38,12 @@ public class CompilationPublicController {
         return compilationService.getCompilations(pinned, from, size);
     }
 
+    /**
+     * Получает информацию о подборке по ее идентификатору.
+     *
+     * @param compId идентификатор подборки
+     * @return объект CompilationDto с информацией о подборке
+     */
     @GetMapping("/{compId}")
     public CompilationDto findByIdCompilation(@PathVariable Long compId) {
         log.info("GET запрос на удаление подборки событий");
