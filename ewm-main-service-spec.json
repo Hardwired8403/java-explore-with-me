@@ -2802,8 +2802,7 @@
             "readOnly": true,
             "example": 1
           },
-          "name": {sudo usermod -aG docker $USER
-
+          "name": {
             "type": "string",
             "description": "Имя",
             "example": "Петров Иван"
